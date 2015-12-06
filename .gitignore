@@ -1,5 +1,4 @@
 # Ignore object files and compiled programs
+main
 *.o
-cilk_merge
-mpi_merge
-omp_merge
+*.log
