@@ -1,17 +1,17 @@
 #include "sequential_merge.h"
 
 
-double sequential_merge(data_t *A, int A_len, data_t *B, int B_len, data_t *result) {
+double sequential_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
 	if (result == NULL)
 		return 0;
 
-	usecs start = getTimestamp();
+	double start = getTimestamp();
 
 	int i = 0;
 	int j = 0;
 	int k = 0;
 
-	while(i<A_len && j<B_len){
+	while(i<lenA && j<lenB){
 		if(A[i]<B[j]){
 			result[k] = A[i];
 			i++;
@@ -23,19 +23,19 @@ double sequential_merge(data_t *A, int A_len, data_t *B, int B_len, data_t *resu
 		k++;
 	}
 
-	while(i<A_len){
+	while(i<lenA){
 		result[k] = A[i];
 		i++;
 		k++;
 	}
 
-	while(j<B_len){
+	while(j<lenB){
 		result[k] = B[j];
 		j++;
 		k++;
 	}
 	
-	usecs end = getTimestamp();
+	double end = getTimestamp();
 	
-	return timeDiff(start, end);
+	return end-start;
 }

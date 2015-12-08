@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-double omp_merge(data_t *A, int A_len, data_t *B, int B_len, data_t *result);
+double omp_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result);
 
 #endif

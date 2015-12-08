@@ -1,14 +1,14 @@
 #include "mpi_merge.h"
 
 
-double mpi_merge(data_t *A, int A_len, data_t *B, int B_len, data_t *result) {
+double mpi_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
 	if (result == NULL)
 		return 0;
 
-	usecs start = getTimestamp();
+	double start = getTimestamp();
 
 	// TODO: implement!
 	
-	usecs end = getTimestamp();
-	return timeDiff(start, end);
+	double end = getTimestamp();
+	return end-start;
 }

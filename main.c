@@ -250,8 +250,8 @@ static void printArray(data_t* arr, int len) {
 
 static void printExecutionStats(char *implName, ExecutionStatistic stats) {
 	fprintf(statLog, "\n%s:\n", implName);
-	fprintf(statLog, "T_min = %llu µs\nT_avg = %llu µs\nT_max = %llu µs\n",
-		(usecs)stats.t_min, (usecs)stats.t_avg, (usecs)stats.t_max);
+	fprintf(statLog, "T_min = %ld µs\nT_avg = %ld µs\nT_max = %ld µs\n",
+		(long)stats.t_min, (long)stats.t_avg, (long)stats.t_max);
 }
 
 
