@@ -21,10 +21,8 @@ void cilk_merge_part(int start, int end, int unit, data_t *A, int lenA, data_t *
 /** Implementations */
 
 double cilk_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
-	if (result == NULL)
-		return 0;
-
 	int unit = lenA+lenB;
+
 	#ifndef SEQUENTIAL
 		unit /= __cilkrts_get_nworkers() * TASKS_PER_WORKER;
 	#endif
