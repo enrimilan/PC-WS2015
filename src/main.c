@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <float.h>
+#include <string.h>
 #include "testsuite.h"
 
 
@@ -21,16 +23,12 @@
 
 /** Type definitions */
 
-typedef enum {FALSE, TRUE} Bool;
-
 typedef struct {
-	int id;
+	char name[25];
 	
-	data_t *A;
-	int A_len;
-	
+	data_t *A;	
 	data_t *B;
-	int B_len;
+	TestSize size;
 	
 } Testcase;
 
@@ -55,8 +53,8 @@ static void executeTestcases(void);
 static void executeSingleTest(Testcase test);
 static void testImplementation(Testcase test, Implementation impl, Result refResult);
 static Result executeMerge(Testcase test, Implementation impl);
-static Testcase generateTestcaseFromDefinition(TestcaseDefinition def);
-static Bool verifyResult(data_t* result, data_t* reference, int len);
+static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize size);
+static bool verifyResult(data_t* result, data_t* reference, int len);
 static void updateExecutionStats(ExecutionStatistic *stats, double execTime);
 
 static data_t* allocArray(int len);
@@ -99,11 +97,13 @@ int main(void) {
 
 
 static void executeTestcases(void) {	
-	for (int i=0; i<numberOfTests; i++) {
-		Testcase test = generateTestcaseFromDefinition(testcases[i]);
-		fprintf(statLog, "TESTCASE %d\n______________\n", test.id);
-		executeSingleTest(test);
-		fprintf(statLog, "\n\n\n");
+	for (int testNo=0; testNo<numberOfTests; testNo++) {
+		for (int sizeNo=0; sizeNo<numberOfSizes; sizeNo++) {
+			Testcase test = generateTestcaseFromDefinition(testcases[testNo], sizes[sizeNo]);
+			fprintf(statLog, "TESTCASE %s - Size %d\n______________\n", test.name, test.size);
+			executeSingleTest(test);
+			fprintf(statLog, "\n\n\n");
+		}
 	}
 
 	printErrorStats(errorLog);
@@ -131,11 +131,11 @@ static void testImplementation(Testcase test, Implementation impl, Result refRes
 	Result implResult = executeMerge(test, impl);
 
 	// Verify that parallel implementation merged correctly
-	int merged_len = test.A_len + test.B_len;
+	int merged_len = 2*test.size;
 
 	if (!verifyResult(implResult.merged, refResult.merged, merged_len)) {
 		failedTests++;
-		fprintf(errorLog, "TESTCASE %d (%s) failed!\n", test.id, impl.name);
+		fprintf(errorLog, "TESTCASE %s - SIZE %d (%s) failed!\n", test.name, test.size, impl.name);
 
 		#ifdef PRINT_ERRORS
 			printFailedTestInfo(implResult.merged, refResult.merged, merged_len);
@@ -148,12 +148,12 @@ static void testImplementation(Testcase test, Implementation impl, Result refRes
 
 
 static Result executeMerge(Testcase test, Implementation impl) {
-	data_t* merged = allocArray(test.A_len + test.B_len);
+	data_t* merged = allocArray(2*test.size);
 	ExecutionStatistic stats = {};
 	stats.t_min = DBL_MAX;
 	
 	for (int i=1; i<=REPEAT_TIMES; i++) {
-		double execTime = impl.func(test.A, test.A_len, test.B, test.B_len, merged);
+		double execTime = impl.func(test.A, test.size, test.B, test.size, merged);
 		updateExecutionStats(&stats, execTime);
 	}
 
@@ -162,27 +162,25 @@ static Result executeMerge(Testcase test, Implementation impl) {
 }
 
 
-static Testcase generateTestcaseFromDefinition(TestcaseDefinition def) {
+static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize size) {
 	Testcase test;
-	test.id = def.id;
+	test.size = size;
+	strncpy(test.name, def.name, strlen(def.name));
 	
-	test.A = fillArray(def.A_start, def.A_inc, def.A_len);
-	test.A_len = def.A_len;
-	
-	test.B = fillArray(def.B_start, def.B_inc, def.B_len);
-	test.B_len = def.B_len;
+	test.A = fillArray(def.A_start, def.A_inc, size);
+	test.B = fillArray(def.B_start, def.B_inc, size);
 
 	return test;
 }
 
 
-static Bool verifyResult(data_t* result, data_t* reference, int len) {
+static bool verifyResult(data_t* result, data_t* reference, int len) {
 	for (int i=0; i<len; i++) {
 		if (result[i] != reference[i])
-			return FALSE;
+			return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 
@@ -280,7 +278,7 @@ static void printFailedTestInfo(data_t* result, data_t* reference, int len) {
 
 
 static void printErrorStats(FILE* dest) {
-	int passedTests = numberOfTests*numberOfImpl - failedTests;
+	int passedTests = numberOfTests*numberOfSizes*numberOfImpl - failedTests;
 	
 	fprintf(dest, "\n%d test%s passed, %d test%s failed!\n",
 		passedTests, (passedTests == 1) ? "" : "s",
