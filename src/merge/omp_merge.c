@@ -1,6 +1,6 @@
 #include "omp_merge.h"
 #include "sequential_merge.h"
-#include "omp.h"
+#include <omp.h>
 
 double omp_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
 	// usually some multiple of the number of cores	

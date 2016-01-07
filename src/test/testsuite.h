@@ -32,9 +32,7 @@ typedef struct {
 extern TestcaseDefinition testcases[];
 extern TestSize sizes[];
 extern Implementation refImpl;
-extern Implementation impl[];
 extern int numberOfTests;
-extern int numberOfImpl;
 extern int numberOfSizes;
 
 

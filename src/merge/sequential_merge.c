@@ -35,4 +35,5 @@ double sequential_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result
 	double end = getTimestamp();
 	
 	return end-start;
+	return 0;
 }

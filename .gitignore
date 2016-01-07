@@ -1,4 +1,7 @@
-# Ignore object files and compiled programs
-main
+# Ignore compiled programs and log files
+cilk
+omp
+mpi
 *.o
 *.log
+*.dat

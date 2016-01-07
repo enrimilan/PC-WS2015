@@ -1,0 +1,50 @@
+set terminal pngcairo enhanced font 'Verdana'
+set samples 1001
+
+# Set grid
+set grid
+set mytics
+set grid mxtic mytic
+set tics scale 1,1 font ", 10"
+
+# Set line styles
+set style line 1 lc rgb 'blue' lt 1 lw 1.5 		# blue line
+set style line 2 lc rgb '#FF8C00' lt 1 lw 1.5  	# orange line
+set style line 3 lc rgb 'red' lt 1 lw 1.5 		# red line
+
+
+# Get input files 
+input_dir = "../output/"
+input_files = system(sprintf("ls %s*.dat", input_dir))
+
+# Define some useful functions
+distinct(file, col) = system(sprintf("awk '{a[$%d]++} a[$%d]<2 {print $%d}' %s", col, col, col, file))
+select(file, col, val) = sprintf("<awk '{if ($%d == \"%s\") {print $0}}' %s", col, val, file)
+
+technology(file) = file[strstrt(file, input_dir)+strlen(input_dir) : strstrt(file, '_')-1]
+testcase(file) = file[strstrt(file, '_') : strstrt(file, '.dat')-1]
+
+
+# Print speedup as function of processor cores
+do for [file in input_files] {
+	output_file(size) = sprintf("%s%s_%s.png", technology(file), testcase(file), size)	
+
+	# Iterate over different sizes
+	do for [size in distinct(file, 2)] {
+		set output output_file(size)
+		
+		# Set labels
+		set xlabel "Processor cores"
+		set ylabel "Speedup"
+
+		# Plot data
+		data = select(file, 2, size)
+		
+		plot data using 1:4 with line ls 1 title "Minimum", \
+			data using 1:6 with line ls 2 title "Average"
+	}
+}
+
+
+
+# TODO: Print time as function of test size

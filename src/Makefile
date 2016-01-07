@@ -1,26 +1,36 @@
-# Makefile for the testsuite
-# Date: 06.12.2015
+# Makefile for the test programs
+# Date: 07.01.2016
 
 
-PROG = main
-IMPL_PATH = merge
-IMPLS = sequential_merge cilk_merge omp_merge mpi_merge
+PROGS = cilk omp
+OUTPUT_DIR = ../output
+IMPL_PATH = merge/$(1)_merge
 
-CCLD = gcc
-CFLAGS = -Wall -fcilkplus -fopenmp -O3 -g -std=c99 -I.
-PARTS = $(PROG) testsuite common $(foreach IMPL,$(IMPLS),$(IMPL_PATH)/$(IMPL))
-OBJS = $(foreach OBJ,$(PARTS),$(OBJ).o)
+CILK_CC = gcc
+OMP_CC = gcc
+MPI_CC = mpicc
+
+CFLAGS = -Wall -O3 -g -std=c99 -I.
+CILK_FLAGS = $(CFLAGS) -fcilkplus
+OMP_FLAGS = $(CFLAGS) -fopenmp
+MPI_FLAGS = $(CFLAGS)
+
+FILES = $(1) $(call IMPL_PATH,$(1)) $(call IMPL_PATH,sequential) test/tester test/testsuite common
+SOURCES = $(foreach SRC,$(call FILES,$(1)),$(SRC).c)
 
 
-all: $(PROG)
+all: $(PROGS)
 
-/%.o: %.c
-	$(CCLD) $(CFLAGS) -c $<
+cilk: 
+	$(CILK_CC) $(CILK_FLAGS) $(call SOURCES,$@) -o $@
 
-$(PROG): $(OBJS)
-	$(CCLD) $(CFLAGS) -o $@ $^
+omp: 
+	$(OMP_CC) $(OMP_FLAGS) $(call SOURCES,$@) -o $@
+
+mpi: 
+	$(MPI_CC) $(MPI_FLAGS) $(call SOURCES,$@) -o $@
 
 clean:
-	rm -rf $(OBJS) $(PROG) *.log
+	rm -rf $(PROGS) $(OUTPUT_DIR)/*.log $(OUTPUT_DIR)/*.dat
 
 .PHONY: all clean

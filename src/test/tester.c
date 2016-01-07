@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <float.h>
 #include <string.h>
-#include "testsuite.h"
+#include "tester.h"
 
 
 /** Constants */
@@ -12,13 +12,13 @@
 //#define		PRINT_ERRORS
 
 // How many times shall we repeat a testcase
-#define		REPEAT_TIMES	(50)
+#define		REPEAT_TIMES	(100)
+
+// Name of the directory where output files will be placed
+#define		OUTPUT_DIR		"../output/"
 
 // Name of the log containing failed test cases			
 #define		ERROR_LOG		"error.log"
-
-// Name of the log containing execution time statistics	
-#define		STAT_LOG		"stats.log"		
 
 
 /** Type definitions */
@@ -35,7 +35,6 @@ typedef struct {
 typedef struct {
 	int times;
 	double t_min;
-	double t_max;
 	double t_avg;
 
 } ExecutionStatistic;
@@ -48,10 +47,8 @@ typedef struct {
 
 
 /** Prototypes */
-static void tester_init(void);
 static void executeTestcases(void);
 static void executeSingleTest(Testcase test);
-static void testImplementation(Testcase test, Implementation impl, Result refResult);
 static Result executeMerge(Testcase test, Implementation impl);
 static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize size);
 static bool verifyResult(data_t* result, data_t* reference, int len);
@@ -60,13 +57,15 @@ static void updateExecutionStats(ExecutionStatistic *stats, double execTime);
 static data_t* allocArray(int len);
 static data_t* fillArray(data_t start, data_t inc, int len);
 static void freeArray(data_t *arr);
+static void openErrorLog(void);
+static void openStatLog(char* testName);
 static void cleanup(void);
 
 static void printArray(data_t* arr, int len);
-static void printExecutionStats(char *implName, ExecutionStatistic stats);
-static void printStatComparison(char *implName, ExecutionStatistic implStats, ExecutionStatistic refStats);
+static void printExecutionStats(Testcase test, ExecutionStatistic implStats, ExecutionStatistic refStats);
+static double deriveSpeedup(double t_par, double t_seq);
 static void printFailedTestInfo(data_t* result, data_t* reference, int len);
-static void printErrorStats(FILE* dest);
+static void printErrorStats(void);
 
 
 /** Global variables */
@@ -74,21 +73,17 @@ static void printErrorStats(FILE* dest);
 static int failedTests = 0;			
 static FILE* errorLog = NULL;		
 static FILE* statLog = NULL;
+static Implementation parImpl;
+static int threads = 0;
 
 
 /** Implementations */
 
-static void tester_init(void) {
-	// Open logs
-	errorLog = fopen(ERROR_LOG, "w");
-	statLog = fopen(STAT_LOG, "w");
+void testImplementation(Implementation _parImpl, int _threads) {
+	parImpl = _parImpl;
+	threads = _threads;
 
-	if (errorLog == NULL || statLog == NULL) {
-		fprintf(stderr, "Error: Could not open logs.");
-		return EXIT_FAILURE;
-	}
-		
-	// Execute testcases
+	openErrorLog();
 	executeTestcases();
 	cleanup();
 }
@@ -96,51 +91,40 @@ static void tester_init(void) {
 
 static void executeTestcases(void) {	
 	for (int testNo=0; testNo<numberOfTests; testNo++) {
+		openStatLog(testcases[testNo].name);
+		
 		for (int sizeNo=0; sizeNo<numberOfSizes; sizeNo++) {
 			Testcase test = generateTestcaseFromDefinition(testcases[testNo], sizes[sizeNo]);
-			fprintf(statLog, "TESTCASE %s - Size %d\n______________\n", test.name, test.size);
 			executeSingleTest(test);
-			fprintf(statLog, "\n\n\n");
 		}
 	}
 
-	printErrorStats(errorLog);
-	printErrorStats(stdout);	
+	printErrorStats();
 }
 
 
 static void executeSingleTest(Testcase test) {
-	// Get reference solution
+	// Execute parallel and reference implementations
 	Result refResult = executeMerge(test, refImpl);
-	printExecutionStats(refImpl.name, refResult.stats);
-
-	// Test each parallel implementation against reference solution
-	for (int i=0; i<numberOfImpl; i++)
-		testImplementation(test, impl[i], refResult);
-
-	// Free memory
-	freeArray(test.A);
-	freeArray(test.B);
-	freeArray(refResult.merged);
-}
-
-
-static void testImplementation(Testcase test, Implementation impl, Result refResult) {
-	Result implResult = executeMerge(test, impl);
+	Result implResult = executeMerge(test, parImpl);
+	printExecutionStats(test, implResult.stats, refResult.stats);
 
 	// Verify that parallel implementation merged correctly
 	int merged_len = 2*test.size;
 
 	if (!verifyResult(implResult.merged, refResult.merged, merged_len)) {
 		failedTests++;
-		fprintf(errorLog, "TESTCASE %s - SIZE %d (%s) failed!\n", test.name, test.size, impl.name);
+		fprintf(errorLog, "TESTCASE %s - SIZE %d (%s) failed!\n", test.name, test.size, parImpl.name);
 
 		#ifdef PRINT_ERRORS
 			printFailedTestInfo(implResult.merged, refResult.merged, merged_len);
 		#endif
 	}
 
-	printStatComparison(impl.name, implResult.stats, refResult.stats);
+	// Free memory
+	freeArray(test.A);
+	freeArray(test.B);
+	freeArray(refResult.merged);
 	freeArray(implResult.merged);
 }
 
@@ -163,7 +147,7 @@ static Result executeMerge(Testcase test, Implementation impl) {
 static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize size) {
 	Testcase test;
 	test.size = size;
-	strncpy(test.name, def.name, strlen(def.name));
+	strncpy(test.name, def.name, strlen(def.name)+1);
 	
 	test.A = fillArray(def.A_start, def.A_inc, size);
 	test.B = fillArray(def.B_start, def.B_inc, size);
@@ -185,9 +169,6 @@ static bool verifyResult(data_t* result, data_t* reference, int len) {
 static void updateExecutionStats(ExecutionStatistic *stats, double execTime) {
 	if (stats->t_min > execTime)
 		stats->t_min = execTime;
-		
-	if (stats->t_max < execTime)
-		stats->t_max = execTime;
 
 	stats->t_avg = (stats->t_avg*stats->times + execTime) / (stats->times+1);
 	stats->times++;
@@ -222,6 +203,22 @@ static void freeArray(data_t *arr) {
 }
 
 
+static void openErrorLog(void) {
+	char filename[100];
+	sprintf(filename, "%s%s", OUTPUT_DIR, ERROR_LOG);
+	
+	errorLog = fopen(filename, "a");
+}
+
+
+static void openStatLog(char* testName) {
+	char filename[100];
+	sprintf(filename, "%s%s_%s.dat", OUTPUT_DIR, parImpl.name, testName);
+	
+	statLog = fopen(filename, "a");
+}
+
+
 static void cleanup(void) {
 	if (errorLog != NULL)
 		fclose(errorLog);
@@ -244,21 +241,22 @@ static void printArray(data_t* arr, int len) {
 }
 
 
-static void printExecutionStats(char *implName, ExecutionStatistic stats) {
-	fprintf(statLog, "\n%s:\n", implName);
-	fprintf(statLog, "T_min = %ld µs\nT_avg = %ld µs\nT_max = %ld µs\n",
-		(long)stats.t_min, (long)stats.t_avg, (long)stats.t_max);
+static void printExecutionStats(Testcase test, ExecutionStatistic implStats, ExecutionStatistic refStats) {
+	double min_speedup = deriveSpeedup(implStats.t_min, refStats.t_min);
+	double avg_speedup = deriveSpeedup(implStats.t_avg, refStats.t_avg);
+		
+	fprintf(statLog, "%d %d %f %f %f %f\n",
+		threads, test.size, implStats.t_min, min_speedup, implStats.t_avg, avg_speedup);
 }
 
 
-static void printStatComparison(char *implName, ExecutionStatistic implStats, ExecutionStatistic refStats) {
-	printExecutionStats(implName, implStats);
-
-	// Print speedup
+static double deriveSpeedup(double t_par, double t_seq) {
 	double speedup = 0;
-	if (implStats.t_avg != 0)
-		speedup = refStats.t_avg / implStats.t_avg;
-	fprintf(statLog, "Speedup = %f\n", speedup);
+
+	if (t_par != 0)
+		speedup = t_seq / t_par;
+
+	return speedup;
 }
 
 
@@ -275,10 +273,11 @@ static void printFailedTestInfo(data_t* result, data_t* reference, int len) {
 }
 
 
-static void printErrorStats(FILE* dest) {
-	int passedTests = numberOfTests*numberOfSizes*numberOfImpl - failedTests;
+static void printErrorStats(void) {
+	int passedTests = numberOfTests*numberOfSizes - failedTests;
 	
-	fprintf(dest, "\n%d test%s passed, %d test%s failed!\n",
+	printf("%s (%d thread%s) :: %d test%s passed, %d test%s failed!\n",
+		parImpl.name, threads, (threads == 1) ? " " : "s",
 		passedTests, (passedTests == 1) ? "" : "s",
 		failedTests, (failedTests == 1) ? "" : "s");
 }

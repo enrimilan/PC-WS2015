@@ -1,14 +1,7 @@
 #include "cilk_merge.h"
 #include "sequential_merge.h"
-
-#ifdef SEQUENTIAL
-	#define cilk_spawn
-	#define cilk_sync
-#else
-	#include <cilk/cilk.h>
-	#include <cilk/cilk_api.h>
-#endif
-
+#include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 
 #define 	TASKS_PER_WORKER	(2) 
 
@@ -21,17 +14,14 @@ void cilk_merge_part(int start, int end, int unit, data_t *A, int lenA, data_t *
 /** Implementations */
 
 double cilk_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
-	int unit = lenA+lenB;
-
-	#ifndef SEQUENTIAL
-		unit /= __cilkrts_get_nworkers() * TASKS_PER_WORKER;
-	#endif
+	int unit = (lenA+lenB) / __cilkrts_get_nworkers() * TASKS_PER_WORKER;
 	
 	double start = getTimestamp();
 	cilk_merge_part(0, lenA+lenB, unit, A, lenA, B, lenB, result);
 	double end = getTimestamp();
 
 	return end-start;
+	return 0;
 }
 
 

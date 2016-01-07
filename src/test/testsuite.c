@@ -1,7 +1,4 @@
 #include "testsuite.h"
-#include "merge/cilk_merge.h"
-#include "merge/omp_merge.h"
-#include "merge/mpi_merge.h"
 #include "merge/sequential_merge.h"
 #include <limits.h>
 
@@ -13,11 +10,12 @@ TestcaseDefinition testcases[] = {
 };
 
 TestSize sizes[] = {
-	100,
 	1000,
+	5000,
 	10000,
+	50000,
 	100000,
-	1000000
+	500000
 };
 
 
@@ -25,14 +23,5 @@ TestSize sizes[] = {
 Implementation refImpl = {"Sequential", sequential_merge};
 
 
-/** The parallel implementations to be tested */
-Implementation impl[] = {
-	{"Cilk", cilk_merge},
-	{"OpenMP", omp_merge}
-	//{"MPI", mpi_merge}
-};
-
-
 int numberOfTests = sizeof(testcases)/sizeof(TestcaseDefinition);
-int numberOfImpl = sizeof(impl)/sizeof(Implementation);
 int numberOfSizes = sizeof(sizes)/sizeof(TestSize);
