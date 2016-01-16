@@ -6,7 +6,7 @@
 
 /** Prototypes */
 
-void testImplementation(Implementation _parImpl, int _threads);
-
+void executeTestcases(Implementation *_parImpl, int _threads);
+void executeSlave(void (*salveFunc)(void));
 
 #endif

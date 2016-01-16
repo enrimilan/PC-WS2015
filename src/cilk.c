@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 
 	// Execute tests
 	Implementation impl = {"Cilk", cilk_merge};
-	testImplementation(impl, threads);
+	executeTestcases(&impl, threads);
 	
 	return EXIT_SUCCESS;
 }

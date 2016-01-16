@@ -3,6 +3,7 @@
 
 #include "common.h"
 
-double mpi_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result);
+double mpi_merge_master(data_t *A, int lenA, data_t *B, int lenB, data_t *result);
+void mpi_merge_slave(void);
 
 #endif

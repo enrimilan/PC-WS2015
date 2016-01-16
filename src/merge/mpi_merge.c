@@ -1,11 +1,14 @@
 #include "mpi_merge.h"
+#include <mpi.h>
 
 
-double mpi_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
-	double start = getTimestamp();
-
+double mpi_merge_master(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
 	// TODO: implement!
 	
-	double end = getTimestamp();
-	return end-start;
+	return 0;
+}
+
+
+void mpi_merge_slave(void) {
+	// TODO: implement!
 }

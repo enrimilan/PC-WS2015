@@ -2,7 +2,7 @@
 # Date: 07.01.2016
 
 
-PROGS = cilk omp
+PROGS = cilk omp mpi
 OUTPUT_DIR = ../output
 IMPL_PATH = merge/$(1)_merge
 
@@ -31,6 +31,6 @@ mpi:
 	$(MPI_CC) $(MPI_FLAGS) $(call SOURCES,$@) -o $@
 
 clean:
-	rm -rf $(PROGS) $(OUTPUT_DIR)/*.log $(OUTPUT_DIR)/*.dat
+	rm -f $(PROGS) $(OUTPUT_DIR)/*.log $(OUTPUT_DIR)/*.dat
 
 .PHONY: all clean

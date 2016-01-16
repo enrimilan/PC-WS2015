@@ -2,10 +2,12 @@
 #include "sequential_merge.h"
 #include <omp.h>
 
+
 double omp_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
 	// usually some multiple of the number of cores	
 	int p = omp_get_max_threads();
-	double start1 = getTimestamp();
+	double start = getTimestamp();
+	
 	#pragma omp parallel
 	{
  		#pragma omp for
@@ -18,7 +20,7 @@ double omp_merge(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {
 			(void) sequential_merge(A+startA, endA-startA, B+startB, endB-startB, result+start);
  		}
 	}
-	double end = getTimestamp();
 	
-	return end-start1;
+	double end = getTimestamp();
+	return end-start;
 }

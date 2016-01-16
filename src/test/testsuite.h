@@ -35,5 +35,4 @@ extern Implementation refImpl;
 extern int numberOfTests;
 extern int numberOfSizes;
 
-
 #endif

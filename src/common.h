@@ -15,5 +15,4 @@ int parseArguments(int argc, char** argv);
 double getTimestamp(void);
 void coranks(int index, data_t *A, int lenA, int *corankA, data_t *B, int lenB, int *corankB);
 
-
 #endif

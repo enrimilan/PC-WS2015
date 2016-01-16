@@ -47,49 +47,44 @@ typedef struct {
 
 
 /** Prototypes */
-static void executeTestcases(void);
 static void executeSingleTest(Testcase test);
-static Result executeMerge(Testcase test, Implementation impl);
+static Result executeMerge(Testcase test, Implementation *impl);
 static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize size);
 static bool verifyResult(data_t* result, data_t* reference, int len);
 static void updateExecutionStats(ExecutionStatistic *stats, double execTime);
+static double calcSpeedup(double t_par, double t_seq);
 
 static data_t* allocArray(int len);
 static data_t* fillArray(data_t start, data_t inc, int len);
 static void freeArray(data_t *arr);
+static FILE* openLog(char* filename);
 static void openErrorLog(void);
 static void openStatLog(char* testName);
 static void cleanup(void);
 
 static void printArray(data_t* arr, int len);
 static void printExecutionStats(Testcase test, ExecutionStatistic implStats, ExecutionStatistic refStats);
-static double deriveSpeedup(double t_par, double t_seq);
 static void printFailedTestInfo(data_t* result, data_t* reference, int len);
 static void printErrorStats(void);
 
 
 /** Global variables */
 
-static int failedTests = 0;			
-static FILE* errorLog = NULL;		
-static FILE* statLog = NULL;
-static Implementation parImpl;
-static int threads = 0;
+static Implementation *parImpl = NULL;
+static int threads = 0;		
+static FILE *errorLog = NULL;		
+static FILE *statLog = NULL;
+static int failedTests = 0;
 
 
 /** Implementations */
 
-void testImplementation(Implementation _parImpl, int _threads) {
+void executeTestcases(Implementation *_parImpl, int _threads) {	
 	parImpl = _parImpl;
 	threads = _threads;
-
 	openErrorLog();
-	executeTestcases();
-	cleanup();
-}
 
-
-static void executeTestcases(void) {	
+	// Execute test cases
 	for (int testNo=0; testNo<numberOfTests; testNo++) {
 		openStatLog(testcases[testNo].name);
 		
@@ -100,21 +95,30 @@ static void executeTestcases(void) {
 	}
 
 	printErrorStats();
+	cleanup();
+}
+
+
+void executeSlave(void (*slaveFunc)(void)) {
+	for (int testNo=0; testNo<numberOfTests; testNo++) {
+		for (int sizeNo=0; sizeNo<numberOfSizes; sizeNo++) {
+			slaveFunc();
+		}
+	}
 }
 
 
 static void executeSingleTest(Testcase test) {
 	// Execute parallel and reference implementations
-	Result refResult = executeMerge(test, refImpl);
+	Result refResult = executeMerge(test, &refImpl);
 	Result implResult = executeMerge(test, parImpl);
 	printExecutionStats(test, implResult.stats, refResult.stats);
 
 	// Verify that parallel implementation merged correctly
-	int merged_len = 2*test.size;
-
-	if (!verifyResult(implResult.merged, refResult.merged, merged_len)) {
+	if (!verifyResult(implResult.merged, refResult.merged, 2*test.size)) {
 		failedTests++;
-		fprintf(errorLog, "TESTCASE %s - SIZE %d (%s) failed!\n", test.name, test.size, parImpl.name);
+		fprintf(errorLog, "%s [%d threads]: Testcase '%s' (%d) failed!\n",
+			parImpl->name, threads, test.name, test.size);
 
 		#ifdef PRINT_ERRORS
 			printFailedTestInfo(implResult.merged, refResult.merged, merged_len);
@@ -129,13 +133,13 @@ static void executeSingleTest(Testcase test) {
 }
 
 
-static Result executeMerge(Testcase test, Implementation impl) {
+static Result executeMerge(Testcase test, Implementation *impl) {
 	data_t* merged = allocArray(2*test.size);
 	ExecutionStatistic stats = {};
 	stats.t_min = DBL_MAX;
 	
 	for (int i=1; i<=REPEAT_TIMES; i++) {
-		double execTime = impl.func(test.A, test.size, test.B, test.size, merged);
+		double execTime = impl->func(test.A, test.size, test.B, test.size, merged);
 		updateExecutionStats(&stats, execTime);
 	}
 
@@ -175,6 +179,16 @@ static void updateExecutionStats(ExecutionStatistic *stats, double execTime) {
 }
 
 
+static double calcSpeedup(double t_par, double t_seq) {
+	double speedup = 0;
+
+	if (t_par != 0)
+		speedup = t_seq / t_par;
+
+	return speedup;
+}
+
+
 static data_t* allocArray(int len) {
 	if (len <= 0)
 		return NULL;
@@ -203,19 +217,28 @@ static void freeArray(data_t *arr) {
 }
 
 
+static FILE* openLog(char* filename) {
+	FILE *log = fopen(filename, "a");
+	if (log == NULL)
+		fprintf(stderr, "Could not open log '%s'", filename);
+
+	return log;
+}
+
+
 static void openErrorLog(void) {
 	char filename[100];
 	sprintf(filename, "%s%s", OUTPUT_DIR, ERROR_LOG);
 	
-	errorLog = fopen(filename, "a");
+	errorLog = openLog(filename);
 }
 
 
 static void openStatLog(char* testName) {
 	char filename[100];
-	sprintf(filename, "%s%s_%s.dat", OUTPUT_DIR, parImpl.name, testName);
+	sprintf(filename, "%s%s_%s.dat", OUTPUT_DIR, parImpl->name, testName);
 	
-	statLog = fopen(filename, "a");
+	statLog = openLog(filename);
 }
 
 
@@ -242,21 +265,11 @@ static void printArray(data_t* arr, int len) {
 
 
 static void printExecutionStats(Testcase test, ExecutionStatistic implStats, ExecutionStatistic refStats) {
-	double min_speedup = deriveSpeedup(implStats.t_min, refStats.t_min);
-	double avg_speedup = deriveSpeedup(implStats.t_avg, refStats.t_avg);
+	double min_speedup = calcSpeedup(implStats.t_min, refStats.t_min);
+	double avg_speedup = calcSpeedup(implStats.t_avg, refStats.t_avg);
 		
 	fprintf(statLog, "%d %d %f %f %f %f\n",
 		threads, test.size, implStats.t_min, min_speedup, implStats.t_avg, avg_speedup);
-}
-
-
-static double deriveSpeedup(double t_par, double t_seq) {
-	double speedup = 0;
-
-	if (t_par != 0)
-		speedup = t_seq / t_par;
-
-	return speedup;
 }
 
 
@@ -276,8 +289,8 @@ static void printFailedTestInfo(data_t* result, data_t* reference, int len) {
 static void printErrorStats(void) {
 	int passedTests = numberOfTests*numberOfSizes - failedTests;
 	
-	printf("%s (%d thread%s) :: %d test%s passed, %d test%s failed!\n",
-		parImpl.name, threads, (threads == 1) ? " " : "s",
+	printf("%s\t::  %d test%s passed, %d test%s failed!\n",
+		parImpl->name,
 		passedTests, (passedTests == 1) ? "" : "s",
 		failedTests, (failedTests == 1) ? "" : "s");
 }

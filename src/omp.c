@@ -12,8 +12,8 @@ int main(int argc, char** argv) {
 	omp_set_num_threads(threads);
 
 	// Execute tests
-	Implementation impl = {"OMP", omp_merge};
-	testImplementation(impl, threads);
+	Implementation impl = {"OpenMP", omp_merge};
+	executeTestcases(&impl, threads);
 	
 	return EXIT_SUCCESS;
 }

@@ -3,7 +3,6 @@ set samples 1001
 
 # Set grid
 set grid
-set mytics
 set grid mxtic mytic
 set tics scale 1,1 font ", 10"
 

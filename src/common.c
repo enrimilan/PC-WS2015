@@ -10,8 +10,10 @@ int parseArguments(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
+	// Get number of threads
 	char *temp;
 	int threads = strtol(argv[1], &temp, 10);
+
 	if (*temp != '\0' || threads <= 0) {
 		fprintf(stderr, "Error: the number of threads has to be a positive integer!\n");
 		exit(EXIT_FAILURE);

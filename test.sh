@@ -3,35 +3,33 @@
 SRC_DIR="src"
 PLOT_DIR="plots"
 
-
-# Compile sources
-cd $SRC_DIR
-echo -n "Compiling sources... "
-make clean > /dev/null 2> /dev/null
-make all > /dev/null 2> /dev/null
-echo -e "Done!"
+SERVERS="saturn"
 
 
-# Execute Cilk
-echo -e "\nExecuting Cilk..."
-for threads in {1..48..2}
+bash cleanup.sh
+
+for server in $SERVERS
 do
-	./cilk $threads
-done
+	exec_script="test_"$server".sh"
 
+	# Upload sources
+	echo -n "Uploading sources to "$server"... "
+	ssh $server rm -rf *
+	scp -r output src $exec_script $server: > /dev/null
+	echo "Done!"
 
-# Execute OpenMP
-echo -e "\nExecuting OpenMP..."
-for threads in {1..48..2}
-do
-	./omp $threads
+	# Execute tests
+	ssh $server bash $exec_script
+
+	# Download benchmarks
+	echo -n "Downloading benchmarks from "$server"... "
+	scp -r $server:output . > /dev/null
+	echo "Done!"
 done
-cd ..
 
 
 # Draw plots
 cd $PLOT_DIR
-echo -en "\nDrawing plots... "
-gnuplot PerfPlots > /dev/null 2> /dev/null
-echo -e "Done!\n"
-cd ..
+echo -n "Drawing plots... "
+gnuplot PerfPlots > /dev/null
+echo "Done!"
