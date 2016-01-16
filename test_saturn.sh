@@ -9,7 +9,6 @@ echo -n "Building sources... "
 make all > /dev/null 2> /dev/null
 echo "Done!"
 
-
 # Execute implementations
 echo -e "Executing implementations...\n"
 for threads in {1..48}

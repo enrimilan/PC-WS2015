@@ -14,7 +14,6 @@ do
 
 	# Upload sources
 	echo -n "Uploading sources to "$server"... "
-	ssh $server rm -rf *
 	scp -r output src $exec_script $server: > /dev/null
 	echo "Done!"
 
@@ -24,12 +23,12 @@ do
 	# Download benchmarks
 	echo -n "Downloading benchmarks from "$server"... "
 	scp -r $server:output . > /dev/null
+	ssh $server rm -rf *
 	echo "Done!"
 done
-
 
 # Draw plots
 cd $PLOT_DIR
 echo -n "Drawing plots... "
-gnuplot PerfPlots > /dev/null
+gnuplot PerfPlots > /dev/null 2> /dev/null
 echo "Done!"
