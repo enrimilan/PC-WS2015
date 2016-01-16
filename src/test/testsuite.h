@@ -6,8 +6,6 @@
 
 /** Type definitions */
 
-typedef double (*MergeFunc) (data_t*, int, data_t*, int, data_t*);
-
 typedef int TestSize;
 
 typedef struct {
@@ -22,7 +20,7 @@ typedef struct {
 
 typedef struct {
 	char* name;
-	MergeFunc func;
+	double (*func) (data_t*, int, data_t*, int, data_t*);
 	
 } Implementation;
 

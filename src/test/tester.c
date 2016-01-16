@@ -99,10 +99,10 @@ void executeTestcases(Implementation *_parImpl, int _threads) {
 }
 
 
-void executeSlave(void (*slaveFunc)(void)) {
+void executeSlave(void (*slaveFunc)(int, int)) {
 	for (int testNo=0; testNo<numberOfTests; testNo++) {
 		for (int sizeNo=0; sizeNo<numberOfSizes; sizeNo++) {
-			slaveFunc();
+			slaveFunc(sizes[sizeNo], sizes[sizeNo]);
 		}
 	}
 }

@@ -7,6 +7,6 @@
 /** Prototypes */
 
 void executeTestcases(Implementation *_parImpl, int _threads);
-void executeSlave(void (*salveFunc)(void));
+void executeSlave(void (*slaveFunc)(int, int));
 
 #endif
