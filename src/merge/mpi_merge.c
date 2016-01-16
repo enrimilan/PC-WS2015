@@ -1,5 +1,6 @@
 #include "mpi_merge.h"
 #include <mpi.h>
+#include <stdio.h>
 
 
 double mpi_merge_master(data_t *A, int lenA, data_t *B, int lenB, data_t *result) {

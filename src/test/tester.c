@@ -102,7 +102,9 @@ void executeTestcases(Implementation *_parImpl, int _threads) {
 void executeSlave(void (*slaveFunc)(int, int)) {
 	for (int testNo=0; testNo<numberOfTests; testNo++) {
 		for (int sizeNo=0; sizeNo<numberOfSizes; sizeNo++) {
-			slaveFunc(sizes[sizeNo], sizes[sizeNo]);
+			for (int i=0; i<REPEAT_TIMES; i++) {
+				slaveFunc(sizes[sizeNo], sizes[sizeNo]);
+			}
 		}
 	}
 }
@@ -138,7 +140,7 @@ static Result executeMerge(Testcase test, Implementation *impl) {
 	ExecutionStatistic stats = {};
 	stats.t_min = DBL_MAX;
 	
-	for (int i=1; i<=REPEAT_TIMES; i++) {
+	for (int i=0; i<REPEAT_TIMES; i++) {
 		double execTime = impl->func(test.A, test.size, test.B, test.size, merged);
 		updateExecutionStats(&stats, execTime);
 	}
