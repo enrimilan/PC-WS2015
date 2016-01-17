@@ -21,10 +21,10 @@ double mpi_merge_master(data_t *A, int lenA, data_t *B, int lenB, data_t *result
 	distribute_data(A, B, lenA, lenB, &win_A, &win_B, &global_index_start);
 	long global_index_end = global_index_start + local_array_A_length + local_array_B_length;
 	
-	double start = MPI_Wtime();
+	double start = MPI_Wtime() * 1000000;
 	data_t *local_merged_array = malloc((local_array_A_length + local_array_B_length) * sizeof(data_t));
 	mpi_merge(lenA, lenB, global_index_start, global_index_end, win_A, win_B, local_merged_array);
-	double end = MPI_Wtime();
+	double end = MPI_Wtime() * 1000000;
 	
 	MPI_Gather(local_merged_array, local_array_A_length + local_array_B_length, MPI_LONG, result, local_array_A_length + local_array_B_length, MPI_LONG, ROOT, MPI_COMM_WORLD);
 	
