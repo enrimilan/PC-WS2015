@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 	}
 	else {
 		// Execute tests as slave
-		executeSlave(mpi_merge_slave);
+		executeSlave(mpi_merge_slave, threads);
 	}
 
 	MPI_Finalize();

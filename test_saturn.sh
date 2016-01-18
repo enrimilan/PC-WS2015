@@ -18,7 +18,7 @@ do
 	
 	./cilk $threads 2> /dev/null
 	./omp $threads 2> /dev/null
-	mpirun -np $threads ./mpi $threads 2> /dev/null
+	mpirun -np $threads ./mpi $threads
 
 	echo
 done

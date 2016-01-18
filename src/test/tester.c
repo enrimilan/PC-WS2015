@@ -28,7 +28,9 @@ typedef struct {
 	
 	data_t *A;	
 	data_t *B;
-	TestSize size;
+
+	TestSize refSize;
+	TestSize actualSize;
 	
 } Testcase;
 
@@ -53,6 +55,7 @@ static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize 
 static bool verifyResult(data_t* result, data_t* reference, int len);
 static void updateExecutionStats(ExecutionStatistic *stats, double execTime);
 static double calcSpeedup(double t_par, double t_seq);
+static TestSize calcActualSize(TestSize refSize);
 
 static data_t* allocArray(int len);
 static data_t* fillArray(data_t start, data_t inc, int len);
@@ -63,7 +66,7 @@ static void openStatLog(char* testName);
 static void cleanup(void);
 
 static void printArray(data_t* arr, int len);
-static void printExecutionStats(Testcase test, ExecutionStatistic implStats, ExecutionStatistic refStats);
+static void printExecutionStats(ExecutionStatistic implStats, ExecutionStatistic refStats, TestSize refSize);
 static void printFailedTestInfo(data_t* result, data_t* reference, int len);
 static void printErrorStats(void);
 
@@ -99,11 +102,14 @@ void executeTestcases(Implementation *_parImpl, int _threads) {
 }
 
 
-void executeSlave(void (*slaveFunc)(int, int)) {
+void executeSlave(void (*slaveFunc)(int, int), int _threads) {
+	threads = _threads;
+
 	for (int testNo=0; testNo<numberOfTests; testNo++) {
 		for (int sizeNo=0; sizeNo<numberOfSizes; sizeNo++) {
 			for (int i=0; i<REPEAT_TIMES; i++) {
-				slaveFunc(sizes[sizeNo], sizes[sizeNo]);
+				TestSize actualSize = calcActualSize(sizes[sizeNo]);
+				slaveFunc(actualSize, actualSize);
 			}
 		}
 	}
@@ -114,16 +120,16 @@ static void executeSingleTest(Testcase test) {
 	// Execute parallel and reference implementations
 	Result refResult = executeMerge(test, &refImpl);
 	Result implResult = executeMerge(test, parImpl);
-	printExecutionStats(test, implResult.stats, refResult.stats);
+	printExecutionStats(implResult.stats, refResult.stats, test.refSize);
 
 	// Verify that parallel implementation merged correctly
-	if (!verifyResult(implResult.merged, refResult.merged, 2*test.size)) {
+	if (!verifyResult(implResult.merged, refResult.merged, 2*test.actualSize)) {
 		failedTests++;
 		fprintf(errorLog, "%s [%d threads]: Testcase '%s' (%d) failed!\n",
-			parImpl->name, threads, test.name, test.size);
+			parImpl->name, threads, test.name, test.refSize);
 
 		#ifdef PRINT_ERRORS
-			printFailedTestInfo(implResult.merged, refResult.merged, merged_len);
+			printFailedTestInfo(implResult.merged, refResult.merged, 2*test.actualSize);
 		#endif
 	}
 
@@ -136,12 +142,12 @@ static void executeSingleTest(Testcase test) {
 
 
 static Result executeMerge(Testcase test, Implementation *impl) {
-	data_t* merged = allocArray(2*test.size);
+	data_t* merged = allocArray(2*test.actualSize);
 	ExecutionStatistic stats = {};
 	stats.t_min = DBL_MAX;
 	
 	for (int i=0; i<REPEAT_TIMES; i++) {
-		double execTime = impl->func(test.A, test.size, test.B, test.size, merged);
+		double execTime = impl->func(test.A, test.actualSize, test.B, test.actualSize, merged);
 		updateExecutionStats(&stats, execTime);
 	}
 
@@ -152,11 +158,13 @@ static Result executeMerge(Testcase test, Implementation *impl) {
 
 static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize size) {
 	Testcase test;
-	test.size = size;
 	strncpy(test.name, def.name, strlen(def.name)+1);
 	
 	test.A = fillArray(def.A_start, def.A_inc, size);
 	test.B = fillArray(def.B_start, def.B_inc, size);
+
+	test.refSize = size;
+	test.actualSize = calcActualSize(size);
 
 	return test;
 }
@@ -188,6 +196,11 @@ static double calcSpeedup(double t_par, double t_seq) {
 		speedup = t_seq / t_par;
 
 	return speedup;
+}
+
+
+static TestSize calcActualSize(TestSize refSize) {
+	return refSize / threads * threads;
 }
 
 
@@ -266,12 +279,12 @@ static void printArray(data_t* arr, int len) {
 }
 
 
-static void printExecutionStats(Testcase test, ExecutionStatistic implStats, ExecutionStatistic refStats) {
+static void printExecutionStats(ExecutionStatistic implStats, ExecutionStatistic refStats, TestSize refSize) {
 	double min_speedup = calcSpeedup(implStats.t_min, refStats.t_min);
 	double avg_speedup = calcSpeedup(implStats.t_avg, refStats.t_avg);
 		
 	fprintf(statLog, "%d %d %f %f %f %f\n",
-		threads, test.size, implStats.t_min, min_speedup, implStats.t_avg, avg_speedup);
+		threads, refSize, implStats.t_min, min_speedup, implStats.t_avg, avg_speedup);
 }
 
 
