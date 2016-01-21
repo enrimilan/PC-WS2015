@@ -1,13 +1,9 @@
-#ifndef COMMON_H
-#define COMMOM_H
-
-#include <stdlib.h>
+#ifndef COMM_H
+#define COMM_H
 
 
 /** Type definitions */
-
 typedef long data_t;	// Type of data to be merged
-
 
 /** Prototypes */
 

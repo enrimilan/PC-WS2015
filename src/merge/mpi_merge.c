@@ -1,7 +1,7 @@
 #include "mpi_merge.h"
-#include <mpi.h>
-#include <stdio.h>
 #include "sequential_merge.h"
+#include <stdlib.h>
+#include <mpi.h>
 
 #define ROOT (0)
 

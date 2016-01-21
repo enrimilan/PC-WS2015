@@ -3,7 +3,7 @@
 SRC_DIR="src"
 PLOT_DIR="plots"
 
-SERVERS="saturn"
+SERVERS="saturn jupiter"
 
 
 bash cleanup.sh
@@ -22,8 +22,8 @@ do
 	ssh $server bash $exec_script
 
 	# Download benchmarks
-	echo -n "Downloading benchmarks from "$server"... "
-	scp -r $server:output . > /dev/null
+	echo -en "\nDownloading benchmarks from "$server"... "
+	scp $server:output/*.dat ./output > /dev/null
 	echo "Done!"
 done
 

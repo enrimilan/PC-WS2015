@@ -5,20 +5,20 @@ SRC_DIR="src"
 
 # Build sources
 cd $SRC_DIR
-echo -n "Building sources... "
-make all > /dev/null 2> /dev/null
+echo -n "Saturn: Building sources... "
+make cilk omp > /dev/null 2> /dev/null
 echo "Done!"
 
-# Execute implementations
-echo -e "Executing implementations...\n"
-for threads in {1..48}
+# Execute Cilk
+echo -e "Saturn: Executing Cilk...\n"
+for threads in 1 {2..48..2}
 do
-	echo -n $threads" thread"
-	[ "$threads" -eq 1 ] && echo ":" || echo "s:" 
-	
 	./cilk $threads 2> /dev/null
-	./omp $threads 2> /dev/null
-	mpirun -np $threads ./mpi $threads
+done
 
-	echo
+# Execute OpenMP
+echo -e "\nSaturn: Executing OpenMP...\n"
+for threads in 1 {2..48..2}
+do
+	./omp $threads 2> /dev/null
 done

@@ -158,13 +158,12 @@ static Result executeMerge(Testcase test, Implementation *impl) {
 
 static Testcase generateTestcaseFromDefinition(TestcaseDefinition def, TestSize size) {
 	Testcase test;
+	test.refSize = size;
+	test.actualSize = calcActualSize(size);
 	strncpy(test.name, def.name, strlen(def.name)+1);
 	
 	test.A = fillArray(def.A_start, def.A_inc, size);
 	test.B = fillArray(def.B_start, def.B_inc, size);
-
-	test.refSize = size;
-	test.actualSize = calcActualSize(size);
 
 	return test;
 }
@@ -304,8 +303,8 @@ static void printFailedTestInfo(data_t* result, data_t* reference, int len) {
 static void printErrorStats(void) {
 	int passedTests = numberOfTests*numberOfSizes - failedTests;
 	
-	printf("%s\t::  %d test%s passed, %d test%s failed!\n",
-		parImpl->name,
+	printf("%s [%d worker%s]  ::  %d test%s passed, %d test%s failed!\n",
+		parImpl->name, threads, (threads == 1) ? " " : "s",
 		passedTests, (passedTests == 1) ? "" : "s",
 		failedTests, (failedTests == 1) ? "" : "s");
 }
