@@ -1,0 +1,48 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage{typearea}
+\usepackage{scrpage2}
+\usepackage{vmargin}
+\usepackage{color}
+\usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\lstset{inputencoding=ansinew}
+\usepackage{spreadtab}
+\usepackage{framed}
+\hypersetup{pdfstartview=FitH}
+\hypersetup{%
+    pdfborder = {0 0 0}
+}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+ \includegraphics[width=0.16\textwidth]{resources/informatik_logo}
+\includegraphics[width=0.55\textwidth]{resources/tu_logo}\\[1cm]
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\HRule \\[0.4cm]
+{ \Large \bfseries Einführung in paralleles Rechnen\\
+Wintersemester 2015\\ [0.2cm]
+Projekt 2: Merging \\ [0.2cm]
+Bericht}\\[0.4cm]
+
+\HRule \\[1.5cm]
+{\huge
+Stefan Karner, 1027209 \hfill Enri Miho, 0929003
+}
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+\section{Section 1}
+\input{chapters/chapter1}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
