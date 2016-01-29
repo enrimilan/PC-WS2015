@@ -15,6 +15,6 @@ bibtex   $OUT_DIR/$SOURCE
 pdflatex $PL_ARGS
 pdflatex $PL_ARGS
 
-# Move pdf to current folder
+# Move pdf to root folder
 mv $OUT_DIR/$SOURCE.pdf $SOURCE.pdf
-echo -e "\n\nThesis document compiled."
+echo -e "\n\nDocument successfully compiled!"
