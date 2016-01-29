@@ -5,3 +5,17 @@ mpi
 *.o
 *.log
 *.dat
+
+# Ignore latex auxiliary files and pdfs
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.bbl
+*.bcf
+*.blg
+*.pdf
