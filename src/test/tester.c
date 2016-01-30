@@ -8,9 +8,6 @@
 
 /** Constants */
 
-// Comment the following line out to prevent that information on failed test cases is printed into the error log	
-//#define		PRINT_ERRORS
-
 // How many times shall we repeat a testcase
 #define		REPEAT_TIMES	(100)
 
@@ -65,10 +62,8 @@ static void openErrorLog(void);
 static void openStatLog(char* testName);
 static void cleanup(void);
 
-static void printArray(data_t* arr, int len);
-static void printExecutionStats(ExecutionStatistic implStats, ExecutionStatistic refStats, TestSize refSize);
-static void printFailedTestInfo(data_t* result, data_t* reference, int len);
 static void printErrorStats(void);
+static void printExecutionStats(ExecutionStatistic implStats, ExecutionStatistic refStats, TestSize refSize);
 
 
 /** Global variables */
@@ -127,10 +122,6 @@ static void executeSingleTest(Testcase test) {
 		failedTests++;
 		fprintf(errorLog, "%s [%d threads]: Testcase '%s' (%d) failed!\n",
 			parImpl->name, threads, test.name, test.refSize);
-
-		#ifdef PRINT_ERRORS
-			printFailedTestInfo(implResult.merged, refResult.merged, 2*test.actualSize);
-		#endif
 	}
 
 	// Free memory
@@ -267,14 +258,13 @@ static void cleanup(void) {
 
 /** Printing functions */
 
-static void printArray(data_t* arr, int len) {
-	fprintf(errorLog, "[");
-
-	for (int i=0; i<len; i++) {
-		fprintf(errorLog, " %ld", arr[i]);
-	}
-
-	fprintf(errorLog, " ]\n");
+static void printErrorStats(void) {
+	int passedTests = numberOfTests*numberOfSizes - failedTests;
+	
+	printf("%s [%d worker%s]  ::  %d test%s passed, %d test%s failed!\n",
+		parImpl->name, threads, (threads == 1) ? " " : "s",
+		passedTests, (passedTests == 1) ? "" : "s",
+		failedTests, (failedTests == 1) ? "" : "s");
 }
 
 
@@ -284,27 +274,4 @@ static void printExecutionStats(ExecutionStatistic implStats, ExecutionStatistic
 		
 	fprintf(statLog, "%d %d %f %f %f %f\n",
 		threads, refSize, implStats.t_min, min_speedup, implStats.t_avg, avg_speedup);
-}
-
-
-static void printFailedTestInfo(data_t* result, data_t* reference, int len) {
-	fprintf(errorLog, "Expected: ");
-	printArray(reference, len);
-
-	fprintf(errorLog, "Result:   ");
-	printArray(result, len);
-
-	for (int i=0; i<len+7; i++)
-		fprintf(errorLog, "__");
-	fprintf(errorLog, "\n\n\n");
-}
-
-
-static void printErrorStats(void) {
-	int passedTests = numberOfTests*numberOfSizes - failedTests;
-	
-	printf("%s [%d worker%s]  ::  %d test%s passed, %d test%s failed!\n",
-		parImpl->name, threads, (threads == 1) ? " " : "s",
-		passedTests, (passedTests == 1) ? "" : "s",
-		failedTests, (failedTests == 1) ? "" : "s");
 }

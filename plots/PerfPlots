@@ -15,7 +15,7 @@ inputFiles	 	= 	system(sprintf("ls %s*.dat", inputDir))
 
 # Define some useful functions
 select(file, col, val) 	= 	sprintf("<awk '{if ($%d == \"%s\") {print $0}}' %s", col, val, file)
-getName(file) 			=	file[strstrt(file, inputDir)+strlen(inputDir) : strstrt(file, '.dat')-1]
+getLogName(file) 		=	file[strstrt(file, inputDir)+strlen(inputDir) : strstrt(file, '.dat')-1]
 getTechnology(log) 		= 	log[0 : strstrt(log, '_')-1]
 
 # Select test sizes and cores to be plotted
@@ -26,10 +26,10 @@ coresJupiter	= 	"1 16 96 288 576"
 
 # Draw plots
 do for [file in inputFiles] {
-	name = getName(file)
+	logName = getLogName(file)
 	
 	# Print speedup as function of processor cores
-	set output name . "_cores.png"
+	set output logName . "_sizes.png"
 	set xlabel "Processor cores"
 	set ylabel "Speedup"
 
@@ -38,11 +38,11 @@ do for [file in inputFiles] {
 
 
 	# Print mean execution time as function of test size
-	set output name . "_sizes.png"
+	set output logName . "_cores.png"
 	set xlabel "Test size"
 	set ylabel "Execution time (µs)"
 
-	coreList = (getTechnology(name) eq "MPI") ? coresJupiter : coresSaturn
+	coreList = (getTechnology(logName) eq "MPI") ? coresJupiter : coresSaturn
 	plot for [cores in coreList] select(file, 1, cores) \
 			using 2:5 with lp lw 1.5 pt 7 title "p=".cores
 }
