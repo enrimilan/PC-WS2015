@@ -3,7 +3,9 @@
 
 
 /** Type definitions */
+
 typedef long data_t;	// Type of data to be merged
+
 
 /** Prototypes */
 

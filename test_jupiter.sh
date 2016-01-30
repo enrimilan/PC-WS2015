@@ -10,7 +10,7 @@ make mpi > /dev/null 2> /dev/null
 echo "Done!"
 
 echo -e "Jupiter: Executing MPI...\n"
-for procs in 1 {16..576..16}
+for procs in 1 16 {48..576..48}
 do
 	# Compute processes per host
 	arg_string=""
