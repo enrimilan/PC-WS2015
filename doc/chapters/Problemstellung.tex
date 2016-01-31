@@ -1,0 +1,13 @@
+In diesem Bericht stellen wir einen parellelen Algorithmus vor, der 2 gegebene Arrays mit den Längen $m$ und $n$ in ein Array der Länge $m + n$ zusammenfügt. Beide Input-Arrays sind schon aufsteigend sortiert. Das resultierende Array muss dann auch aufsteigend sortiert sein. Dabei muss der Algorithmus für \emph{jede Array Größe} und \emph{jede Anzahl von Prozessoren/Threads} funktionieren.\\
+Implementiert wird das ganze in der Programmierprache c. Der parallele Algorithmus wird mit der Hilfe von 3  Frameworks implementiert (jeweils eine Implementierung für jedes Framework):
+\begin{itemize}
+\item OpenMP: eine API für Shared-Memory-Programmierung
+\item Cilk: eine Art Programmiersprache für parellele Berechnungen, die auf die Programmierprache c aufbaut
+\item MPI: ein Interface, das den Austausch von Nachrichten  bei parallelen Berechnungen auf verteilten Systemen ermöglicht
+\end{itemize}
+Wichtig dabei ist, dass alle Prozessoren ungefähr gleich viel zu tun haben (workload balancing). Das heißt die Arrays die jeder Prozessor übergeben bekommt haben alle ungefähr die gleiche Länge. Wie das erreicht werden kann, wird später erklärt.\\
+Anschließend müssen die Laufzeiten von jeder dieser parellelen Implementierungen mit der Laufzeit der sequentiellen Referenzimplementierung verglichen werden. Das Zeil ist zu analysieren wie viel schneller die parallelen Programme sind. Die Zahl die das angibt nennt man \emph{Speedup} und ist definiert durch:
+\begin{center}
+$ S = \frac{T_{seq}}{T_{par}}$
+\end{center}
+wobei $T_{seq}$ die Ausführungszeit der sequentiellen Implementierung ist und $T_{par}$ die der parallelen.
