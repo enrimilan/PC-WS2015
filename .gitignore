@@ -19,3 +19,6 @@ mpi
 *.bcf
 *.blg
 *.pdf
+
+# Ignore db files
+*.db
