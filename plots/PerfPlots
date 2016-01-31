@@ -39,10 +39,10 @@ do for [file in inputFiles] {
 
 	# Print mean execution time as function of test size
 	set output logName . "_cores.png"
-	set xlabel "Test size"
-	set ylabel "Execution time (µs)"
+	set xlabel "Test size (x1000)"
+	set ylabel "Execution time (ms)"
 
 	coreList = (getTechnology(logName) eq "MPI") ? coresJupiter : coresSaturn
 	plot for [cores in coreList] select(file, 1, cores) \
-			using 2:5 with lp lw 1.5 pt 7 title "p=".cores
+			using ($2/1000):($5/1000) with lp lw 1.5 pt 7 title "p=".cores
 }
