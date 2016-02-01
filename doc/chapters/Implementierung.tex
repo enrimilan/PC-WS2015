@@ -19,5 +19,22 @@ Mit Hilfe von den Konstrukten von OpenMP kann erreicht werden, dass jeder Durchl
 Die Durchläufe finden also parallel statt. Die Prozesse/Threads arbeiten dabei unabhängig von einander, kommen sich also nicht in die Quere. Da die Grenzen eindeutig bestimmt sind, können mehrere Prozesse gleichzeitig das resultierende Array mit den verschmelzten Daten befüllen, indem sie die sequentielle Implementierung aufrufen.
 
 \subsection{Cilk}
+Der rekursive Algorithmus hier funktioniert nach dem \emph{divide and conquer} Prinzip. Das resultierende Array wird dabei immer in 2 Hälften aufgeteilt und für jede Hälfte ein neuer Task gespawned. Das wird so lang gemacht, bis das Array von $end$ bis $start$ nicht zu groß für ein Paket ist. $unit$ bezeichnet dabei die maximalgröße eines Pakets, das ein Task selber merged.
+\begin{verbatim}
+if (end-start <= unit) {
+      int startA, endA, startB, endB;
+     // Merge data
+     coranks(start, A, lenA, &startA, B, lenB, &startB);
+     coranks(end, A, lenA, &endA, B, lenB, &endB);
+     sequential_merge(A+startA, endA-startA, B+startB, 
+           endB-startB, result+start);
+}
+else {
+      // Distribute work to other threads
+      int middle = start + (end-start)/2;
+      cilk_spawn cilk_merge_part(start, middle, unit, A, lenA, B, lenB, result);
+      cilk_spawn cilk_merge_part(middle, end, unit, A, lenA, B, lenB, result);
+}
+\end{verbatim}
 
 \subsection{MPI}
