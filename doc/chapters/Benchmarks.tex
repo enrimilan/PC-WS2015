@@ -1,0 +1,39 @@
+Um herauszufinden, wie effizient unsere parallelen Implementierungen sind, haben wir uns folgende zwei Szenarien angesehen:
+\begin{itemize}
+	\item \textbf{Disjunct}\quad
+		Hierbei sind alle Elemente des einen Arrays größer als jene des anderen.
+		Dieser Fall stellt den \emph{Best Case} dar, da nach der Coranks-Berechnung alle (außer max. ein) Worker nur auf ein einziges Array zugreifen müssen.
+		Der Synchronisationsaufwand ist somit minimal.
+		
+	\item \textbf{Interleaved}\quad
+		In diesem Testfall sind die Elemente der beiden Arrays perfekt verzahnt.
+		Es handelt sich hierbei um den \emph{Worst Case}, da jeder Worker stets auf beide Arrays zugreifen muss.
+\end{itemize}
+
+Für jedes dieser Szenarien haben wir die Ausführungszeiten mit unterschiedlichen Array-Größen gemessen.
+Beide Arrays umfassten in unseren Tests je circa 1000, 10000, 50000, 100000, 250000 sowie 500000 Elemente.
+Hierbei handelt es sich jedoch nicht um die exakten Arraygrößen, sondern um grobe Richtwerte.
+Bei der Implementierung mit MPI hatten wir angenommen, dass die Anzahl der Prozessoren die Testgröße ohne Rest teilt.
+Es ist jedoch nicht möglich Arraygrößen zu finden, die durch jede beliebige natürlich Zahl teilbar sind.
+Aus diesem Grund behalfen wir uns mit einem Trick.
+Wir wandten folgende Formel auf die obengenannten Testgrößen an:
+\begin{center}
+	$n_{act} = \left \lfloor{\frac{n_{ref}}{p}}\right \rfloor \cdot p$
+\end{center}
+
+$n_{act}$ steht hier für die tatsächliche Arraygröße, $n_{ref}$ für die Referenzgröße und $p$ für die Anzahl der Prozessoren.
+Auf diese Weise erhält jeder Prozessor gleich viele Elemente eines Arrays.
+Damit die Tests fair bleiben, haben wir die Anpassung der Testgrößen natürlich für jede Implementierung vorgenommen.
+ 
+Weiters haben wir die Tests mit unterschiedlich vielen Workern durchgeführt.
+Cilk und OpenMP wurden auf \emph{Saturn} getestet, wo 48 Kerne zur Verfügung stehen.
+MPI wurde auf \emph{Jupiter} ausgeführt, welcher 36 mal 16, insgesamt also 576 Kerne besitzt.
+Wir haben auf den jeweiligen Maschinen daher folgende Anzahlen an Workern gestartet:
+\begin{itemize}
+	\item \textbf{Saturn:} 1, 2, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48
+	\item \textbf{Jupiter:} 1, 16, 48, 96, 144, 192, 240, 288, 336, 384, 432, 480, 528, 576
+\end{itemize}
+ 
+Somit erhielten wir ein Set aus 168 Tests pro paralleler Implementierung.
+Bei Jupiter achteten wir darauf, dass auf jedem Host genau 16 Prozesse ausgeführt werden.
+Hier variierte also nur die Anzahl der beteiligten Hosts und nicht die Anzahl der Prozesse pro Host. 

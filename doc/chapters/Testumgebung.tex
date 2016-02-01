@@ -1,0 +1,24 @@
+Wir haben eine Testumgebung entwickelt, die es uns erlaubt automatisiert zu testen sowie Ausführungszeiten zu messen und anschließend zu plotten.
+In diesem Abschnitt wird ihr grundlegender Aufbau näher erläutert.
+Konkrete Details zu den unterschiedlichen Testszenarien sind in Abschnitt 5 zu finden.
+
+Die Testumgebung besteht aus einer Reihe von C-Programmen und Shell Skripts, sowie einem \texttt{gnuplot} Skript, das für die grafische Darstellung der Benchmarks zuständig ist.
+Für jede parallele Implementierung existiert ein C-Programm, das sich um die Ausführung der einzelnen Testfälle kümmert.
+Als einzigen Parameter verlangt es die Anzahl der Worker, die für das parallele Mergen eingesetzt werden sollen.
+
+Die Testprogramme führen nun für eine Reihe von Testfällen sowohl die sequentielle, als auch die jeweilige parallele Implementierung aus.
+In MPI kümmert sich ausschließlich der \emph{Master}prozess (Prozess mit dem Rank 0) um die Ausführung der Tests.
+Alle anderen Prozesse sind \emph{Slaves} und warten nach dem Start direkt auf die Verteilung der zu mergenden Arrays.
+Um rauscharme Ergebnisse zu erhalten, wird jeder Testfall 100 mal ausgeführt.
+In jeder Ausführung misst die Testumgebung mit, wie lange die jeweilige Implementierung für das Mergen der Daten gebraucht hat.
+Anschließend werden die kleinsten und mittleren Ausführungszeiten der parallelen Implementierungen zusammen mit den erhaltenen Speedups (gruppiert nach Testfall und Implementierung) in Log-Dateien geschrieben.
+
+Um die Korrektheit der implementierten Algorithmen zu gewährleisten wird bei jedem Testdurchlauf das Ergebnisse der sequentiellen Implementierung mit jenem der parallelen verglichen.
+Kommt es hier zu einer Diskrepanz, wird der entsprechende Testfall in einem Error-Log festgehalten.
+Da es während der Ausführung unserer Tests zu keinerlei Fehlern kam, gehen wir davon aus, dass die parallelen Implementierungen korrekt umgesetzt wurden.
+
+Ferner existieren drei Shell Skripts, die die Ausführung der Tests auf den Rechnerclustern, sowie die Generierung der Plots automatisieren.
+Das Skript \texttt{test.sh} lädt den Quellcode sowie je ein weiteres Shell Skript auf die beiden Cluster \emph{Saturn} und \emph{Jupiter} hoch.
+Anschließend ruft es die beiden hochgeladenen Skripts auf, welche die Ausführung der Tests auf den jeweiligen Maschinen koordinieren.
+Jedes der genannten Testprogramme wird nun von dem zuständigen Skript mit unterschiedlichen Anzahlen von Workern aufgerufen.
+Im Abschluss lädt \texttt{test.sh} die erstellten Benchmarks herunter und stellt diese mit gnuplot grafisch dar.
