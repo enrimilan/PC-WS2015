@@ -54,7 +54,7 @@ MPI_Win_create(localdata_A, local_array_A_length,
 MPI_Win_create(localdata_B, local_array_B_length, 
       sizeof(data_t), MPI_INFO_NULL, MPI_COMM_WORLD, win_B);
 \end{verbatim}
-Außerdem war es nötig, eine neue Implementierung für den co-ranks Algorithmus zu schreiben. Der Zugriff auf die Arrays wird dabei durch die Methode \verb|get_data()| abstrahiert. 
+Außerdem war es nötig, eine neue Implementierung für den co-ranks Algorithmus zu schreiben. Diese wurde direkt aus dem Paper übernommen. Der Zugriff auf die Arrays wird dabei durch die Methode \verb|get_data()| abstrahiert. 
 \begin{verbatim}
 data_t get_data(data_t *chunk, long start, long end, long len, MPI_Win win){
       long elements_per_process = len / world_size;

@@ -11,3 +11,35 @@ Bevor der Algorithmus erklärt wird, geben wir die Definition des \emph{co-ranks
 $C[0,\dots,i-1] = merge(A[0,\dots,j-1], B[0,\dots,k-1])$
 \end{center}
 Dann nennt man die Indizes $j$ und $k$ die \emph{co-ranks} von $i$.
+\begin{verbatim}
+void coranks(int index, data_t *A, int lenA, 
+        int *corankA, data_t *B, int lenB, int *corankB) {
+        int minA = (index > lenA) ? index-lenA : 0;
+        int minB = 0;
+
+        // Initialize coranks
+        *corankA = (lenA < index) ? lenA : index;
+        *corankB = index - *corankA;
+
+         // Check if coranks are correct and do binary search if they are not
+         while (1) {
+              if (*corankA > 0 && *corankB < lenA && 
+                    A[*corankA-1] > B[*corankB]) {
+                    int corr = (*corankA - minA + 1)/2;
+                    minB = *corankB;
+                    *corankA -= corr;
+                    *corankB += corr;
+              }
+              else if (*corankA < lenB && *corankB > 0 && 
+                    B[*corankB-1] >= A[*corankA]) {
+                    int corr = (*corankB - minB + 1)/2;
+                    minA = *corankA;
+                    *corankA += corr;
+                    *corankB -= corr;
+              }
+                    else break;
+       }
+}
+\end{verbatim}
+
+Dieser Algorithmus berechnet die Indizes $j$ und $k$. 

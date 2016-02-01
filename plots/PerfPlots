@@ -39,7 +39,7 @@ do for [file in inputFiles] {
 
 	# Print mean execution time as function of test size
 	set output logName . "_cores.png"
-	set xlabel "Test size (x1000)"
+	set xlabel "Array size (x1000)"
 	set ylabel "Execution time (ms)"
 
 	coreList = (getTechnology(logName) eq "MPI") ? coresJupiter : coresSaturn
