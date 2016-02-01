@@ -10,7 +10,7 @@ Wir geben die Definition des \emph{co-ranks}. Sei $merge$ die Funktion, für die
 \begin{center}
 $C[0,\dots,i-1] = merge(A[0,\dots,j-1], B[0,\dots,k-1])$
 \end{center}
-Dann nennt man die Indizes $j$ und $k$ die \emph{co-ranks} von $i$.
+Dann nennt man die Indizes $j$ und $k$ die \emph{co-ranks} von $i$. Der folgende Algorithmus berechnet die Indizes $j$ und $k$:
 \begin{verbatim}
 void coranks(int index, data_t *A, int lenA, 
         int *corankA, data_t *B, int lenB, int *corankB) {
@@ -41,5 +41,3 @@ void coranks(int index, data_t *A, int lenA,
        }
 }
 \end{verbatim}
-
-Dieser Algorithmus berechnet die Indizes $j$ und $k$. Als erstes schaut er, was die maximalen bzw. minimalen co-ranks sein können. Danach sucht er binär nach den richtigen.
