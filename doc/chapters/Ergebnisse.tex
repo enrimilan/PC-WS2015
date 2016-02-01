@@ -4,7 +4,7 @@ Aus diesem Grund kam es gelegentlich zu ungewöhnlich hohen Ausführungszeiten b
 Um dieses Problem abzuschwächen, ließen wir unsere Testsskripts mehrmals durchlaufen und warteten stets darauf, dass möglichst wenige Benutzer auf den Maschinen aktiv sind.
 
 Wir haben zwei verschiedene Arten von Plots erstellt.
-Zum einen wird die mittlere Ausführungszeit eines Tests als Funktion der Testgröße dargestellt.
+Zum einen wird die mittlere Ausführungszeit eines Tests als Funktion der Arraygröße dargestellt.
 Die Größe bezieht sich hierbei auf die Elemente eines einzelnen Arrays.
 Das gemergte Array umfasst also doppelt so viele Elemente wie im Plot angegeben.
 Zum anderen wird der erreichte Speedup als Funktion der Prozessorzahl visualisiert.
@@ -28,14 +28,14 @@ Eine grafische Übersicht der Benchmarks ist in den Abbildungen \ref{Cilk_Disjun
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=404pt]{resources/plots/Cilk_Disjunct_sizes.png}
-	\caption{Cilk (disjuct) - Speedup als Funktion der Prozessorkerne}
+	\caption{Cilk (disjunct) - Speedup als Funktion der Prozessorkerne}
 	\label{Cilk_Disjunct_sizes}
 \end{figure}
 
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=404pt]{resources/plots/Cilk_Disjunct_cores.png}
-	\caption{Cilk (disjuct) - Ausführungszeit als Funktion der Testgröße}
+	\caption{Cilk (disjunct) - Ausführungszeit als Funktion der Testgröße}
 	\label{Cilk_Disjunct_cores}
 \end{figure}
 
@@ -71,14 +71,14 @@ Während der Speedup bei \emph{Disjunct} und $n = 500000$ den Faktor 50 deutlich
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=404pt]{resources/plots/OpenMP_Disjunct_sizes.png}
-	\caption{OpenMP (disjuct) - Speedup als Funktion der Prozessorkerne}
+	\caption{OpenMP (disjunct) - Speedup als Funktion der Prozessorkerne}
 	\label{OpenMP_Disjunct_sizes}
 \end{figure}
 
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=404pt]{resources/plots/OpenMP_Disjunct_cores.png}
-	\caption{OpenMP (disjuct) - Ausführungszeit als Funktion der Testgröße}
+	\caption{OpenMP (disjunct) - Ausführungszeit als Funktion der Testgröße}
 	\label{OpenMP_Disjunct_cores}
 \end{figure}
 
@@ -111,14 +111,14 @@ Wir gehen davon aus, dass der Kommunikationsoverhead bei dem implementierten Alg
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=404pt]{resources/plots/MPI_Disjunct_sizes.png}
-	\caption{MPI (disjuct) - Speedup als Funktion der Prozessorkerne}
+	\caption{MPI (disjunct) - Speedup als Funktion der Prozessorkerne}
 	\label{MPI_Disjunct_sizes}
 \end{figure}
 
 \begin{figure}[p]
 	\centering
 	\includegraphics[width=404pt]{resources/plots/MPI_Disjunct_cores.png}
-	\caption{MPI (disjuct) - Ausführungszeit als Funktion der Testgröße}
+	\caption{MPI (disjunct) - Ausführungszeit als Funktion der Testgröße}
 	\label{MPI_Disjunct_cores}
 \end{figure}
 
