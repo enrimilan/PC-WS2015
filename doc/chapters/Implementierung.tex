@@ -1,3 +1,23 @@
 \subsection{OpenMP}
+Wie man dem Code entnehmen kann, sind $start$ und $end$ die Grezen für jeden Durchlauf, also von wo bis wo jeder Prozess in das resultierende Array schreiben soll. Die Grenzen für die Input-Arrays (aus denen gelesen wird) werden durch die $coranks$-Implementierung die wir vorgestellt haben, bestimmt.\\
+Mit Hilfe von den Konstrukten von OpenMP kann erreicht werden, dass jeder Durchlauf von einem eigenen Prozessor durchgeführt wird. 
+\begin{verbatim}
+#pragma omp parallel
+{
+    #pragma omp for
+    for (int i=0; i<p; i++) {
+        int startA, endA, startB, endB;
+        long start = (long)i*(long)(lenA+lenB)/(long)p;
+        long end = (long)(i+1)*(long)(lenA+lenB)/(long)p;
+        coranks(start, A, lenA, &startA, B, lenB, &startB);
+        coranks(end, A, lenA, &endA, B, lenB, &endB);
+        sequential_merge(A+startA, endA-startA, B+startB, 
+             endB-startB, result+start);
+    }
+}
+\end{verbatim}
+Die Durchläufe finden also parallel statt. Die Prozesse/Threads arbeiten dabei unabhängig von einander, kommen sich also nicht in die Quere. Da die Grenzen eindeutig bestimmt sind, können mehrere Prozesse gleichzeitig das resultierende Array mit den verschmelzten Daten befüllen, indem sie die sequentielle Implementierung aufrufen.
+
 \subsection{Cilk}
+
 \subsection{MPI}
