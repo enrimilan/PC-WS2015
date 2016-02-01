@@ -6,7 +6,7 @@ Der Übergang vom sequentiellen Algorithmus zum parallelen ist nicht trivial. Da
 
 Es wurden zu Beginn einige Ansätze untersucht, die auch in den Folien beschrieben sind. Gewählt wurde am Ende der letzte, \emph{merging by co-ranking}, da bei diesem Ansatz alle Prozessoren Teile gleicher Länge übergeben bekommen. Außerdem überschreitet die Anzahl der Prozessoren $(m+n) / log min(m,n)$ nicht, das heißt der Speedup des Algorithmus ist \emph{optimal}. Der Algorithmus wurde mit Hilfe eines Papers~\cite{corank} konzipiert.
 
-Bevor der Algorithmus erklärt wird, geben wir die Definition des \emph{co-ranks}. Sei $merge$ die Funktion, für die gilt:
+Wir geben die Definition des \emph{co-ranks}. Sei $merge$ die Funktion, für die gilt:
 \begin{center}
 $C[0,\dots,i-1] = merge(A[0,\dots,j-1], B[0,\dots,k-1])$
 \end{center}
@@ -42,4 +42,4 @@ void coranks(int index, data_t *A, int lenA,
 }
 \end{verbatim}
 
-Dieser Algorithmus berechnet die Indizes $j$ und $k$. 
+Dieser Algorithmus berechnet die Indizes $j$ und $k$. Als erstes schaut er, was die maximalen bzw. minimalen co-ranks sein können. Danach sucht er binär nach den richtigen.
