@@ -1,5 +1,6 @@
 \subsection{OpenMP}
-Wie man dem Code entnehmen kann, sind $start$ und $end$ die Grezen für jeden Durchlauf, also von wo bis wo jeder Prozess in das resultierende Array schreiben soll. Die Grenzen für die Input-Arrays (aus denen gelesen wird) werden durch die $coranks$-Implementierung die wir vorgestellt haben, bestimmt.\\
+Wie man dem Code entnehmen kann, sind $start$ und $end$ die Grenzen für jeden Durchlauf, also von wo bis wo jeder Prozess in das resultierende Array schreiben soll. Die Grenzen für die Input-Arrays (aus denen gelesen wird) werden durch die $coranks$-Implementierung, die wir vorgestellt haben, bestimmt.
+
 Mit Hilfe von den Konstrukten von OpenMP kann erreicht werden, dass jeder Durchlauf von einem eigenen Prozessor durchgeführt wird. 
 \begin{verbatim}
 #pragma omp parallel
@@ -16,10 +17,10 @@ Mit Hilfe von den Konstrukten von OpenMP kann erreicht werden, dass jeder Durchl
     }
 }
 \end{verbatim}
-Die Durchläufe finden also parallel statt. Die Prozesse/Threads arbeiten dabei unabhängig von einander, kommen sich also nicht in die Quere. Da die Grenzen eindeutig bestimmt sind, können mehrere Prozesse gleichzeitig das resultierende Array mit den verschmelzten Daten befüllen, indem sie die sequentielle Implementierung aufrufen.
+Die Durchläufe finden also parallel statt. Die Prozesse/Threads arbeiten dabei unabhängig von einander, kommen sich also nicht in die Quere. Da die Grenzen eindeutig bestimmt sind, können mehrere Prozesse gleichzeitig das resultierende Array mit den gemergten Daten befüllen, indem sie die sequentielle Implementierung aufrufen.
 
 \subsection{Cilk}
-Der rekursive Algorithmus hier funktioniert nach dem \emph{divide and conquer} Prinzip. Das resultierende Array wird dabei immer in 2 Hälften aufgeteilt und für jede Hälfte ein neuer Task gespawned. Das wird so lang gemacht, bis das Array von $end$ bis $start$ nicht zu groß für ein Paket ist. $unit$ bezeichnet dabei die maximalgröße eines Pakets, das ein Task selber merged.
+Der rekursive Algorithmus hier funktioniert nach dem \emph{divide and conquer} Prinzip. Das resultierende Array wird dabei immer in 2 Hälften aufgeteilt und für jede Hälfte ein neuer Task gespawned. Das wird so lang gemacht, bis das Array von $end$ bis $start$ nicht zu groß für ein Paket ist. $unit$ bezeichnet dabei die Maximalgröße eines Pakets, das ein Thread selbst merged.
 \begin{verbatim}
 if (end-start <= unit) {
       int startA, endA, startB, endB;

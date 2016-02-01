@@ -2,8 +2,10 @@
 Der sequentielle Algorithmus vergleicht in jedem Durchlauf die Werte an den aktuellen Indizes beider Input-Arrays. Der Index wird erhöht für das Array das beim Vergleich den kleineren Wert (dieser wird in das resultierende Array geschrieben) hat. Erreicht man das Ende eines der beiden Arrays, werden die übrig gebliebenen Elemente des anderen in das resultierende Array geschrieben (ab dem aktuellen Index).
 
 \subsection{Der parallele Algorithmus}
-Der Übergang vom sequentiellen Algorithmus zum parallelen ist nicht trivial. Das Problem besteht darin, dass jeder Durchlauf von den vorigen abhängt. Die Idee ist die Input-Arrays so zu zerteilen, dass die Prozessoren dann mit diesen Teilen unabhängig von einander arbeiten können.\\
-Es wurden zu Beginn einige Ansätze untersucht, die auch in den Folien beschrieben sind. Gewählt wurde am Ende der letzte,  \emph{merging by co-ranking}, da bei diesem Ansatz alle Prozessoren Teile gleicher Länge übergeben kriegen. Außerdem überschreitet die Anzahl der Prozessoren $(m+n) / log min(m,n)$ nicht, das heißt der Speedup des Algorithmus ist \emph{optimal}. Der Algorithmus wurde mit Hilfe eines Papers~\cite{corank} konzipiert.\\
+Der Übergang vom sequentiellen Algorithmus zum parallelen ist nicht trivial. Das Problem besteht darin, dass jeder Durchlauf von den vorigen abhängt. Die Idee ist die Input-Arrays so zu zerteilen, dass die Prozessoren dann mit diesen Teilen unabhängig von einander arbeiten können.
+
+Es wurden zu Beginn einige Ansätze untersucht, die auch in den Folien beschrieben sind. Gewählt wurde am Ende der letzte, \emph{merging by co-ranking}, da bei diesem Ansatz alle Prozessoren Teile gleicher Länge übergeben kriegen. Außerdem überschreitet die Anzahl der Prozessoren $(m+n) / log min(m,n)$ nicht, das heißt der Speedup des Algorithmus ist \emph{optimal}. Der Algorithmus wurde mit Hilfe eines Papers~\cite{corank} konzipiert.
+
 Bevor der Algorithmus erklärt wird, geben wir die Definition des \emph{co-ranks}. Sei $merge$ die Funktion, für die gilt:
 \begin{center}
 $C[0,\dots,i-1] = merge(A[0,\dots,j-1], B[0,\dots,k-1])$
