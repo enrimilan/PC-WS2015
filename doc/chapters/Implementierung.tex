@@ -1,3 +1,5 @@
+Es werden hier unsere 3 Implementierungen vorgestellt. Die Programme im Verzeichnis src enthalten alle jeweils eine main-Methode, die die Implementierung aufruft. Diese sind unter src/merge zu finden. Um das ganze zu kompilieren reicht es $make$ aufzurufen. 
+
 \subsection{OpenMP}
 Wie man dem Code entnehmen kann, sind $start$ und $end$ die Grenzen für jeden Durchlauf, also von wo bis wo jeder Prozess in das resultierende Array schreiben soll. Die Grenzen für die Input-Arrays (aus denen gelesen wird) werden durch die $coranks$-Implementierung, die wir vorgestellt haben, bestimmt.
 
@@ -39,3 +41,41 @@ else {
 \end{verbatim}
 
 \subsection{MPI}
+Die MPI-Implementierung ist ein bisschen anders, da hier keine Shared-Memory verwendet wird. Stattdessen kommunizieren die Prozesse miteinander. Diese Implementierung baut auf einem Paper~\cite{mpi} auf. Dabei wurden folgende Annahmen getroffen:
+\begin{itemize}
+\item die Anzahl der Prozessoren $p$ teilt die Summe der Längen beider Arrays bzw die Länge des resultierenden Arrays
+\item die Input-Arrays haben beide gleiche Längen
+\end{itemize}
+Wie die namen vermuten lassen, ist \verb|mpi_merge_master()| die Methode die im Root-Prozess aufgerufen wird und \verb|mpi_merge_slave()| die die von den restlichen Prozessen verwendet wird. Als allererstes müssen die Daten an die anderen Prozesse verteilt werden. Das passiert in \verb|distribute_data()|. Durch die getroffenen Annahmen war die Verteilung der Daten nicht sehr komplex. Da die Prozesse eventuell miteinander kommunizieren müssen um die co-ranks zu berechnen, wurden communication windows verwendet um die Daten offenzulegen.
+\begin{verbatim}
+//expose the data
+MPI_Win_create(localdata_A, local_array_A_length, 
+      sizeof(data_t), MPI_INFO_NULL, MPI_COMM_WORLD, win_A);
+MPI_Win_create(localdata_B, local_array_B_length, 
+      sizeof(data_t), MPI_INFO_NULL, MPI_COMM_WORLD, win_B);
+\end{verbatim}
+Außerdem war es nötig, eine neue Implementierung für den Algorithmus der die co-ranks ausrechnet, zu schreiben. Der Zugriff auf die Arrays wird dabei durch die Methode \verb|get_data()| abstrahiert. 
+\begin{verbatim}
+data_t get_data(data_t *chunk, long start, long end, long len, MPI_Win win){
+      long elements_per_process = len / world_size;
+      int target_rank = start / elements_per_process;
+      long local_index = start - (target_rank * elements_per_process);
+      long count = end - start + 1;
+      long chunk_position = 0;
+      long remaining;
+      while(count>0){
+           remaining = elements_per_process - local_index;
+           long to_copy = remaining > count ? count : remaining;
+           MPI_Win_lock(MPI_LOCK_SHARED, target_rank, MPI_MODE_NOCHECK, win);
+           MPI_Get(chunk+chunk_position, to_copy, MPI_LONG, 
+                  target_rank, local_index, to_copy, MPI_LONG, win);
+           MPI_Win_unlock(target_rank, win);
+           count = count - remaining;
+           local_index = 0;
+           target_rank++;
+           chunk_position = chunk_position + remaining;
+      }
+      return chunk[0];
+}
+\end{verbatim}
+Die Synchronisation erfolgt über shared locks. Durch \verb| MPI_MODE_NOCHECK| gibt man an, dass Zugriffe gleichzeitig erfolgen können, da man die Daten nur liest. Am Ende werden die verschmelzten Daten wieder abgesammelt.
